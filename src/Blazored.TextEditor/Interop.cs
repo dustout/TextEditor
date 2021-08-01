@@ -11,6 +11,7 @@ namespace Blazored.TextEditor
             ElementReference quillElement,
             ElementReference toolbar,
             bool readOnly,
+            bool hideToolbar,
             string placeholder,
             string theme,
             string debugLevel,
@@ -19,7 +20,7 @@ namespace Blazored.TextEditor
         {
             return jsRuntime.InvokeAsync<object>(
                 "QuillFunctions.createQuill", 
-                quillElement, toolbar, readOnly, 
+                quillElement, toolbar, readOnly, hideToolbar,
                 placeholder, theme, debugLevel, blazoredTextEditor);
         }
 

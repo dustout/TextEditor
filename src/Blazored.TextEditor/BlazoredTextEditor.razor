@@ -1,9 +1,13 @@
 ﻿@inject IJSRuntime JSRuntime
 @implements IDisposable
 
-<div @ref="@ToolBar">
-    @ToolbarContent
-</div>
+@if (HideToolbar == false)
+{
+    <div @ref="@ToolBar">
+        @ToolbarContent
+    </div>
+}
+
 <div @ref="@QuillElement">
     @EditorContent
 </div>
@@ -14,6 +18,9 @@
 
     [Parameter]
     public RenderFragment ToolbarContent { get; set; }
+
+    [Parameter]
+    public bool HideToolbar { get; set; } = false;
 
     [Parameter]
     public bool ReadOnly { get; set; }
@@ -48,7 +55,7 @@
         }
         set
         {
-            if(_Value == value)
+            if (_Value == value)
             {
                 return;
             }
@@ -82,6 +89,7 @@
                 QuillElement,
                 ToolBar,
                 ReadOnly,
+                HideToolbar,
                 Placeholder,
                 Theme,
                 DebugLevel,

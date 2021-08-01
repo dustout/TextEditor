@@ -1,7 +1,7 @@
 ﻿(function () {
     window.QuillFunctions = {        
         createQuill: function (
-            quillElement, toolBar, readOnly,
+            quillElement, toolBar, readOnly, hideToolbar,
             placeholder, theme, debugLevel, dotNetHelper) {
 
             Quill.register('modules/blotFormatter', QuillBlotFormatter.default);
@@ -16,6 +16,10 @@
                 readOnly: readOnly,
                 theme: theme
             };
+
+            if (hideToolbar) {
+                options.modules.toolbar = false;
+            }
 
             var quill = new Quill(quillElement, options);
 
