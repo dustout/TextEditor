@@ -17,29 +17,51 @@
 
     [Parameter]
     public bool ReadOnly { get; set; }
-        = false;
+    = false;
 
     [Parameter]
     public string Placeholder { get; set; }
-        = "Compose an epic...";
+    = "Compose an epic...";
 
     [Parameter]
     public string Theme { get; set; }
-        = "snow";
+    = "snow";
 
     [Parameter]
     public string DebugLevel { get; set; }
-        = "info";
+    = "info";
 
     [JSInvokable]
     public async Task HtmlChanged()
     {
-        Value = await GetHTML();
+        _Value = await GetHTML();
         await ValueChanged.InvokeAsync(Value);
     }
 
+    private string _Value;
     [Parameter]
-    public string Value { get; set; }
+    public string Value
+    {
+        get
+        {
+            return _Value;
+        }
+        set
+        {
+            if(_Value == value)
+            {
+                return;
+            }
+
+            _Value = value;
+
+            base.InvokeAsync(async () =>
+            {
+                await ValueChanged.InvokeAsync(_Value);
+                await LoadHTMLContent(_Value);
+            });
+        }
+    }
     [Parameter]
     public EventCallback<string> ValueChanged { get; set; }
 
@@ -64,6 +86,8 @@
                 Theme,
                 DebugLevel,
                 objRef);
+
+            await LoadHTMLContent(Value);
         }
     }
 
