@@ -1,8 +1,8 @@
 ﻿(function () {
     window.QuillFunctions = {        
         createQuill: function (
-            quillElement, toolBar, readOnly,
-            placeholder, theme, debugLevel) {  
+            quillElement, toolBar, readOnly, hideToolbar,
+            placeholder, theme, debugLevel, dotNetHelper) {
 
             Quill.register('modules/blotFormatter', QuillBlotFormatter.default);
 
@@ -17,7 +17,18 @@
                 theme: theme
             };
 
-            new Quill(quillElement, options);
+            if (hideToolbar) {
+                options.modules.toolbar = false;
+            }
+
+            var quill = new Quill(quillElement, options);
+
+            if (dotNetHelper) {
+                quill.on('text-change', function () {
+                    dotNetHelper.invokeMethodAsync('HtmlChanged');
+                });
+            }
+            
         },
         getQuillContent: function(quillElement) {
             return JSON.stringify(quillElement.__quill.getContents());

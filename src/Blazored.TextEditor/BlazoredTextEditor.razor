@@ -1,8 +1,13 @@
 ﻿@inject IJSRuntime JSRuntime
+@implements IDisposable
 
-<div @ref="@ToolBar">
-    @ToolbarContent
-</div>
+@if (HideToolbar == false)
+{
+    <div @ref="@ToolBar">
+        @ToolbarContent
+    </div>
+}
+
 <div @ref="@QuillElement">
     @EditorContent
 </div>
@@ -15,20 +20,59 @@
     public RenderFragment ToolbarContent { get; set; }
 
     [Parameter]
+    public bool HideToolbar { get; set; } = false;
+
+    [Parameter]
     public bool ReadOnly { get; set; }
-        = false;
+    = false;
 
     [Parameter]
     public string Placeholder { get; set; }
-        = "Compose an epic...";
+    = "Compose an epic...";
 
     [Parameter]
     public string Theme { get; set; }
-        = "snow";
+    = "snow";
 
     [Parameter]
     public string DebugLevel { get; set; }
-        = "info";
+    = "info";
+
+    [JSInvokable]
+    public async Task HtmlChanged()
+    {
+        _Value = await GetHTML();
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    private string _Value;
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _Value;
+        }
+        set
+        {
+            if (_Value == value)
+            {
+                return;
+            }
+
+            _Value = value;
+
+            base.InvokeAsync(async () =>
+            {
+                await ValueChanged.InvokeAsync(_Value);
+                await LoadHTMLContent(_Value);
+            });
+        }
+    }
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private DotNetObjectReference<BlazoredTextEditor> objRef;
 
     private ElementReference QuillElement;
     private ElementReference ToolBar;
@@ -38,15 +82,26 @@
     {
         if (firstRender)
         {
+            objRef = DotNetObjectReference.Create(this);
+
             await Interop.CreateQuill(
                 JSRuntime,
                 QuillElement,
                 ToolBar,
                 ReadOnly,
+                HideToolbar,
                 Placeholder,
                 Theme,
-                DebugLevel);
+                DebugLevel,
+                objRef);
+
+            await LoadHTMLContent(Value);
         }
+    }
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
     }
 
     public async Task<string> GetText()
